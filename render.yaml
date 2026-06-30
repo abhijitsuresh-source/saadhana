@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: sadhana-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: FRONTEND_ORIGIN
+        value: "*"
