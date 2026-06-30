@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo } from 'react';
 import { fetchDailyPanchang } from '../api';
 import { useAppLocation } from '../LocationContext';
 import { fmtTime12, fmtDateLong, findActivePeriod, findNextAuspicious, minutesBetween } from '../utils';
-import { describePeriodLabel, toneForNature, TONE_COLORS, PANCHANG_TERM_PLAIN, varaPlainName, NATURE_PLAIN } from '../glossary';
 
 export default function Home() {
   const { location, ayanamsa } = useAppLocation();
@@ -43,7 +42,6 @@ export default function Home() {
 
   const activePeriod = useMemo(() => findActivePeriod(panchang, now), [panchang, now]);
   const nextAuspicious = useMemo(() => findNextAuspicious(panchang, now), [panchang, now]);
-  const plainExplanation = useMemo(() => activePeriod ? describePeriodLabel(activePeriod.label) : '', [activePeriod]);
 
   const ringDashOffset = useMemo(() => {
     if (!activePeriod) return 289;
@@ -92,25 +90,6 @@ export default function Home() {
 
   return (
     <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-10 space-y-12">
-      {/* Plain-language TL;DR for first-time visitors */}
-      {activePeriod && (
-        <section className="text-center max-w-xl mx-auto">
-          <p className="font-body-lg text-on-surface">
-            Right now is a{' '}
-            <span className={`font-bold ${toneForNature(activePeriod.nature) === 'bad' ? 'text-error' : toneForNature(activePeriod.nature) === 'great' || toneForNature(activePeriod.nature) === 'good' ? 'text-primary' : 'text-on-surface'}`}>
-              {toneForNature(activePeriod.nature) === 'bad' || toneForNature(activePeriod.nature) === 'caution'
-                ? 'less favorable'
-                : toneForNature(activePeriod.nature) === 'great'
-                ? 'highly favorable'
-                : toneForNature(activePeriod.nature) === 'good'
-                ? 'favorable'
-                : 'neutral'}
-            </span>{' '}
-            time according to today's panchang.
-          </p>
-        </section>
-      )}
-
       {/* Live Clock & Active Period */}
       <section className="flex flex-col items-center justify-center space-y-8">
         <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
@@ -134,22 +113,15 @@ export default function Home() {
                 {activePeriod ? activePeriod.label.toUpperCase() : 'NO ACTIVE PERIOD'}
               </span>
             </div>
-            <div className="font-body-md text-on-surface-variant/80 mt-2">
-              {activePeriod ? (NATURE_PLAIN[activePeriod.nature] || activePeriod.nature) : ''}
-            </div>
+            <div className="font-body-md text-on-surface-variant/80 mt-2">{activePeriod?.nature || ''}</div>
           </div>
         </div>
         {activePeriod && (
-          <div className="flex flex-col items-center gap-3 max-w-md">
-            <p className="font-body-md text-on-surface-variant text-center">
+          <div className="flex flex-col items-center gap-2">
+            <p className="font-body-md text-on-surface-variant text-center max-w-md">
               {fmtTime12(activePeriod.start)} — {fmtTime12(activePeriod.end)}
             </p>
             <div className="text-secondary font-display text-xl font-medium">{timeRemaining}</div>
-            {plainExplanation && (
-              <div className={`px-4 py-3 rounded-xl border text-sm text-center ${TONE_COLORS[toneForNature(activePeriod.nature)] || TONE_COLORS.neutral}`}>
-                {plainExplanation}
-              </div>
-            )}
           </div>
         )}
       </section>
@@ -209,15 +181,15 @@ export default function Home() {
         {/* Panchang Strip */}
         <div className="md:col-span-12 bg-primary-container p-1 rounded-full flex items-center">
           <div className="w-full bg-surface border border-outline-variant/30 rounded-full flex flex-wrap md:flex-nowrap justify-between items-center px-4 md:px-10 py-3 gap-4 overflow-hidden">
-            <PStripItem label="TITHI" value={`${panchang.tithi.paksha} ${panchang.tithi.name}`} tip={PANCHANG_TERM_PLAIN.Tithi} />
+            <PStripItem label="TITHI" value={`${panchang.tithi.paksha} ${panchang.tithi.name}`} />
             <Divider />
-            <PStripItem label="NAKSHATRA" value={panchang.nakshatra.name} tip={PANCHANG_TERM_PLAIN.Nakshatra} />
+            <PStripItem label="NAKSHATRA" value={panchang.nakshatra.name} />
             <Divider />
-            <PStripItem label="YOGA" value={panchang.yoga.name} tip={PANCHANG_TERM_PLAIN.Yoga} />
+            <PStripItem label="YOGA" value={panchang.yoga.name} />
             <Divider />
-            <PStripItem label="KARANA" value={panchang.karana.name} tip={PANCHANG_TERM_PLAIN.Karana} />
+            <PStripItem label="KARANA" value={panchang.karana.name} />
             <Divider />
-            <PStripItem label="VARA" value={`${panchang.vara.name} (${varaPlainName(panchang.vara.name)})`} tip={PANCHANG_TERM_PLAIN.Vara} />
+            <PStripItem label="VARA" value={panchang.vara.name} upper />
           </div>
         </div>
       </section>
@@ -229,11 +201,11 @@ export default function Home() {
   );
 }
 
-function PStripItem({ label, value, upper, tip }) {
+function PStripItem({ label, value, upper }) {
   return (
-    <div className="flex items-center gap-2 group relative" title={tip}>
+    <div className="flex items-center gap-2">
       <span className="text-[10px] font-label-caps text-on-surface-variant/60">{label}:</span>
-      <span className={`text-[12px] font-bold text-primary cursor-help border-b border-dotted border-primary/30 ${upper ? 'uppercase' : ''}`}>{value}</span>
+      <span className={`text-[12px] font-bold text-primary ${upper ? 'uppercase' : ''}`}>{value}</span>
     </div>
   );
 }
