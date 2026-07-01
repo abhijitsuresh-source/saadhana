@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchWeeklyPanchang } from '../api';
 import { useAppLocation } from '../LocationContext';
-import { fmtTime12 } from '../utils';
+import { fmtTime12, localDateStr } from '../utils';
 
 export default function Weekly() {
   const { location, ayanamsa } = useAppLocation();
@@ -11,10 +11,10 @@ export default function Weekly() {
 
   useEffect(() => {
     setLoading(true);
-    fetchWeeklyPanchang({ lat: location.lat, lon: location.lon, ayanamsa })
+    fetchWeeklyPanchang({ date: localDateStr(), lat: location.lat, lon: location.lon, ayanamsa })
       .then((data) => {
         setDays(data.days);
-        const todayStr = new Date().toISOString().slice(0, 10);
+        const todayStr = localDateStr();
         const idx = data.days.findIndex((d) => d.date === todayStr);
         setActiveIdx(idx >= 0 ? idx : 0);
       })

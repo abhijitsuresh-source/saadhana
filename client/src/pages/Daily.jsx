@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { fetchDailyPanchang } from '../api';
 import { useAppLocation } from '../LocationContext';
-import { fmtTime12, fmtDateLong } from '../utils';
+import { fmtTime12, fmtDateLong, localDateStr } from '../utils';
 
 export default function Daily() {
   const { location, ayanamsa } = useAppLocation();
   const [panchang, setPanchang] = useState(null);
-  const [dateStr, setDateStr] = useState(() => new Date().toISOString().slice(0, 10));
+  const [dateStr, setDateStr] = useState(() => localDateStr());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function Daily() {
           </p>
           <div className="flex gap-3 mt-3">
             <button onClick={() => shiftDate(dateStr, -1, setDateStr)} className="px-4 py-1.5 rounded-full border border-outline-variant text-primary font-label-caps text-[10px]">← PREV</button>
-            <button onClick={() => setDateStr(new Date().toISOString().slice(0, 10))} className="px-4 py-1.5 rounded-full border border-outline-variant text-primary font-label-caps text-[10px]">TODAY</button>
+            <button onClick={() => setDateStr(localDateStr())} className="px-4 py-1.5 rounded-full border border-outline-variant text-primary font-label-caps text-[10px]">TODAY</button>
             <button onClick={() => shiftDate(dateStr, 1, setDateStr)} className="px-4 py-1.5 rounded-full border border-outline-variant text-primary font-label-caps text-[10px]">NEXT →</button>
           </div>
         </div>

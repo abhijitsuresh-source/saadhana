@@ -1,3 +1,13 @@
+// Returns YYYY-MM-DD for the browser's LOCAL calendar date.
+// toISOString().slice(0,10) is a common bug here: it returns the UTC date,
+// which is wrong for IST (UTC+5:30) in the hours after midnight local time.
+export function localDateStr(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 export function fmtTime(iso) {
   if (!iso) return '--:--';
   return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });

@@ -3,8 +3,17 @@ const cors = require('cors');
 const { computeDailyPanchang } = require('./panchang');
 
 const app = express();
-const allowedOrigin = process.env.FRONTEND_ORIGIN || '*';
-app.use(cors({ origin: allowedOrigin }));
+const allowedOrigins = (process.env.FRONTEND_ORIGIN || '*').split(',').map(s => s.trim());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // non-browser requests (curl, health checks)
+    if (allowedOrigins.includes('*')) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    // allow any Vercel preview deployment for this project
+    if (/\.vercel\.app$/.test(new URL(origin).hostname)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  }
+}));
 app.use(express.json());
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));

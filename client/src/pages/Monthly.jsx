@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchMonthlyPanchang } from '../api';
 import { useAppLocation } from '../LocationContext';
+import { localDateStr } from '../utils';
 
 export default function Monthly() {
   const { location, ayanamsa } = useAppLocation();
@@ -20,7 +21,7 @@ export default function Monthly() {
 
   const monthLabel = new Date(cursor.year, cursor.month - 1, 1).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
   const firstDayOfWeek = new Date(cursor.year, cursor.month - 1, 1).getDay();
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = localDateStr();
 
   function shiftMonth(delta) {
     let m = cursor.month + delta, y = cursor.year;
