@@ -268,6 +268,21 @@ function computeHora(sunrise, nextSunrise, weekday) {
   return hours;
 }
 
+// Sandhya (twilight worship windows): Prata (dawn), Madhyahnika (midday), Sayam (dusk)
+// Traditional practical rule: each Sandhya spans roughly 24 minutes on either side of its anchor point
+// (sunrise, solar noon, sunset) — some traditions extend Prata Sandhya to start earlier (48 min before sunrise).
+function computeSandhyas(sunrise, sunset) {
+  if (!sunrise || !sunset) return {};
+  const solarNoon = new Date(sunrise.getTime() + (sunset.getTime() - sunrise.getTime()) / 2);
+  const win = 24 * 60 * 1000; // 24 minutes
+
+  return {
+    prata: { start: new Date(sunrise.getTime() - 2 * win), end: new Date(sunrise.getTime() + win) },
+    madhyahnika: { start: new Date(solarNoon.getTime() - win), end: new Date(solarNoon.getTime() + win) },
+    sayam: { start: new Date(sunset.getTime() - win), end: new Date(sunset.getTime() + 2 * win) }
+  };
+}
+
 // Full daily panchang computation
 function computeDailyPanchang({ date, lat, lon, ayanamsa = 'lahiri' }) {
   const noon = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 12, 0, 0));
@@ -291,6 +306,7 @@ function computeDailyPanchang({ date, lat, lon, ayanamsa = 'lahiri' }) {
   const inauspicious = computeInauspiciousPeriods(sunrise, sunset, weekday);
   const abhijit = computeAbhijitMuhurta(sunrise, sunset);
   const brahma = computeBrahmaMuhurta(sunrise);
+  const sandhyas = computeSandhyas(sunrise, sunset);
   const choghadiya = computeChoghadiya(sunrise, sunset, nextSunrise, weekday);
   const hora = computeHora(sunrise, nextSunrise, weekday);
 
@@ -306,6 +322,7 @@ function computeDailyPanchang({ date, lat, lon, ayanamsa = 'lahiri' }) {
     karana,
     vara,
     muhurtas: { abhijit, brahma },
+    sandhyas,
     inauspicious,
     choghadiya,
     hora

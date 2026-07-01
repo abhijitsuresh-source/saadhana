@@ -48,15 +48,16 @@ export default function Daily() {
 
       <div className="flex flex-col lg:flex-row gap-12">
         <div className="lg:w-2/3">
-          <h3 className="font-headline-md text-headline-md mb-6">Muhurta Timeline</h3>
-          <div className="space-y-2">
+          <h3 className="font-headline-md text-headline-md mb-2">Muhurta Timeline</h3>
+          <p className="text-sm text-on-surface-variant/70 mb-6">Full-day view — named muhurtas plus every Choghadiya window, sunrise to sunrise.</p>
+          <div className="space-y-1.5">
             {events.map((e, i) => (
-              <div key={i} className={`flex justify-between items-center p-4 rounded-r-lg border-l-4 ${e.style}`}>
+              <div key={i} className={`flex justify-between items-center p-3 rounded-r-lg border-l-4 ${e.style}`}>
                 <div>
-                  <p className="font-label-caps text-[11px] mb-1 opacity-70">{e.tag}</p>
+                  <p className="font-label-caps text-[10px] mb-0.5 opacity-70">{e.tag}</p>
                   <h4 className="font-bold text-sm">{e.label}</h4>
                 </div>
-                <span className="text-xs text-on-surface-variant/60">{fmtTime12(e.start)} — {fmtTime12(e.end)}</span>
+                <span className="text-xs text-on-surface-variant/60 whitespace-nowrap">{fmtTime12(e.start)} — {fmtTime12(e.end)}</span>
               </div>
             ))}
           </div>
@@ -141,11 +142,51 @@ function ChogRow({ c }) {
 
 function buildEvents(p) {
   const events = [];
-  if (p.muhurtas.brahma) events.push({ label: 'Brahma Muhurta', tag: 'Auspicious', start: p.muhurtas.brahma.start, end: p.muhurtas.brahma.end, style: 'bg-primary/5 border-primary' });
-  if (p.muhurtas.abhijit) events.push({ label: 'Abhijit Muhurta', tag: 'Auspicious', start: p.muhurtas.abhijit.start, end: p.muhurtas.abhijit.end, style: 'bg-tertiary-container/10 border-tertiary-container' });
-  if (p.inauspicious.rahuKalam) events.push({ label: 'Rahu Kalam', tag: 'Inauspicious', start: p.inauspicious.rahuKalam.start, end: p.inauspicious.rahuKalam.end, style: 'bg-error/5 border-error' });
-  if (p.inauspicious.yamaganda) events.push({ label: 'Yamaganda', tag: 'Inauspicious', start: p.inauspicious.yamaganda.start, end: p.inauspicious.yamaganda.end, style: 'bg-error/5 border-error/60' });
-  if (p.inauspicious.gulikaKalam) events.push({ label: 'Gulika Kalam', tag: 'Inauspicious', start: p.inauspicious.gulikaKalam.start, end: p.inauspicious.gulikaKalam.end, style: 'bg-error/5 border-error/40' });
+
+  // Named muhurtas (auspicious)
+  if (p.muhurtas.brahma) events.push({ label: 'Brahma Muhurta', tag: 'Auspicious', kind: 'muhurta', start: p.muhurtas.brahma.start, end: p.muhurtas.brahma.end, style: 'bg-primary/5 border-primary' });
+  if (p.sandhyas?.prata) events.push({ label: 'Prata Sandhya', tag: 'Dawn worship', kind: 'muhurta', start: p.sandhyas.prata.start, end: p.sandhyas.prata.end, style: 'bg-secondary-fixed/20 border-secondary' });
+  if (p.muhurtas.abhijit) events.push({ label: 'Abhijit Muhurta', tag: 'Auspicious', kind: 'muhurta', start: p.muhurtas.abhijit.start, end: p.muhurtas.abhijit.end, style: 'bg-tertiary-container/10 border-tertiary-container' });
+  if (p.sandhyas?.madhyahnika) events.push({ label: 'Madhyahnika Sandhya', tag: 'Midday worship', kind: 'muhurta', start: p.sandhyas.madhyahnika.start, end: p.sandhyas.madhyahnika.end, style: 'bg-secondary-fixed/20 border-secondary' });
+  if (p.sandhyas?.sayam) events.push({ label: 'Sayam Sandhya', tag: 'Dusk worship', kind: 'muhurta', start: p.sandhyas.sayam.start, end: p.sandhyas.sayam.end, style: 'bg-secondary-fixed/20 border-secondary' });
+
+  // Named inauspicious windows
+  if (p.inauspicious.rahuKalam) events.push({ label: 'Rahu Kalam', tag: 'Inauspicious', kind: 'avoid', start: p.inauspicious.rahuKalam.start, end: p.inauspicious.rahuKalam.end, style: 'bg-error/5 border-error' });
+  if (p.inauspicious.yamaganda) events.push({ label: 'Yamaganda', tag: 'Inauspicious', kind: 'avoid', start: p.inauspicious.yamaganda.start, end: p.inauspicious.yamaganda.end, style: 'bg-error/5 border-error/60' });
+  if (p.inauspicious.gulikaKalam) events.push({ label: 'Gulika Kalam', tag: 'Inauspicious', kind: 'avoid', start: p.inauspicious.gulikaKalam.start, end: p.inauspicious.gulikaKalam.end, style: 'bg-error/5 border-error/40' });
+
+  // Fill remaining hours with Choghadiya windows so the timeline covers the FULL day (sunrise -> next sunrise),
+  // not just the handful of named muhurtas — this is what makes it useful for sadhana planning end-to-end.
+  const allChoghadiya = [...(p.choghadiya?.day || []), ...(p.choghadiya?.night || [])];
+  for (const c of allChoghadiya) {
+    const style =
+      c.nature === 'Best' ? 'bg-primary/5 border-primary'
+      : c.nature === 'Good' ? 'bg-tertiary-container/10 border-tertiary-container'
+      : c.nature === 'Neutral' ? 'bg-surface-container border-outline-variant'
+      : 'bg-error/5 border-error/30'; // Loss / Bad
+    events.push({
+      label: `${c.name} Choghadiya`,
+      tag: c.nature === 'Best' || c.nature === 'Good' ? 'Favorable' : c.nature === 'Neutral' ? 'Neutral' : 'Less favorable',
+      kind: 'choghadiya',
+      start: c.start,
+      end: c.end,
+      style
+    });
+  }
+
   events.sort((a, b) => new Date(a.start) - new Date(b.start));
-  return events;
+
+  // Drop Choghadiya slots that are fully covered by a named muhurta/avoid window, so we don't show
+  // two overlapping rows for the same span (e.g. Abhijit Muhurta usually sits inside a Choghadiya slot).
+  const named = events.filter((e) => e.kind !== 'choghadiya');
+  const deduped = events.filter((e) => {
+    if (e.kind !== 'choghadiya') return true;
+    const s = new Date(e.start).getTime(), en = new Date(e.end).getTime();
+    return !named.some((n) => {
+      const ns = new Date(n.start).getTime(), ne = new Date(n.end).getTime();
+      return s >= ns && en <= ne; // fully contained inside a named window -> drop
+    });
+  });
+
+  return deduped;
 }

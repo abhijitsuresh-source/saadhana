@@ -22,6 +22,9 @@ export const NATURE_PLAIN = {
 export const MUHURTA_PLAIN = {
   'Brahma Muhurta': 'The 48 minutes before sunrise — traditionally the best time of day for meditation and quiet practice.',
   'Abhijit Muhurta': 'A roughly 48-minute window around midday considered auspicious for almost any important activity.',
+  'Prata Sandhya': 'Dawn worship window, centered on sunrise — traditional time for morning Sandhya Vandanam and sun salutations.',
+  'Madhyahnika Sandhya': 'Midday worship window, centered on solar noon — the second of the three daily Sandhya prayers.',
+  'Sayam Sandhya': 'Dusk worship window, centered on sunset — the evening Sandhya Vandanam.',
   'Rahu Kalam': "A period each day considered inauspicious for starting anything new. Doesn't affect things already in progress.",
   Yamaganda: 'Another daily inauspicious window — similar guidance to Rahu Kalam.',
   'Gulika Kalam': 'A third daily inauspicious window, generally considered milder than Rahu Kalam.'
